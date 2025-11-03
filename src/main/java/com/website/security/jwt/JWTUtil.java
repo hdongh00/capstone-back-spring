@@ -28,7 +28,7 @@ public class JWTUtil {
     }
 
     public String getUsername(String token){
-        return getInfo(token).get("userId",String.class);
+        return getInfo(token).get("userName",String.class);
     }
     public String getRole(String token){
         return getInfo(token).get("role",String.class);
@@ -49,7 +49,7 @@ public class JWTUtil {
         System.out.println("토큰이 만료될 시간 : "+new Date(System.currentTimeMillis() + expiredMs));
         return Jwts.builder()
                 .claim("userCode",accountCode)
-                .claim("userId",username)
+                .claim("userName",username)
                 .claim("role",role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))

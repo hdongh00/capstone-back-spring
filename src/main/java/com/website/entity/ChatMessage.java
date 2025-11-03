@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * 이 엔티티는 MongoDB 전용 엔티티입니다.
+ */
 @Document(collection = "chat_messages")
 @Getter
 @Setter

@@ -40,6 +40,7 @@ public class UserService {
                     User u = new User();
                     u.setOauthId(userCode);
                     u.setName(name);
+                    u.setNickname(name);
                     u.setProfileImage(profileImage);
                     u.setOauthProvider(provider);
                     u.setRole("ROLE_USER");

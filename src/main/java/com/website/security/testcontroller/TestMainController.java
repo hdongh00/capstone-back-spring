@@ -20,7 +20,7 @@ public class TestMainController {
         return ResponseEntity.ok().body("/api/test 경로 테스트");
     }
     @GetMapping("/auth/test")
-    public ResponseEntity<String> testDefaultUrl(@AuthenticationPrincipal CustomUserDetails user){
-        return ResponseEntity.ok().body("/test 경로 테스트"+ user.getUsername());
+    public ResponseEntity<CustomUserDetails> testDefaultUrl(@AuthenticationPrincipal CustomUserDetails user){
+        return ResponseEntity.ok().body(user);
     }
 }

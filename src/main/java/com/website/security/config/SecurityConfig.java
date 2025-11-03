@@ -17,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
 
@@ -41,72 +42,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
-    // 1) /api/** 요청만 처리하는 체인: 완전 공용, JWTFilter 없음
-    @Bean
-    @Order(1)
-    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher(
-                        "/api/**",
-                        "/login/**",               // 기존 로그인
-                        "/favicon.ico",
-                        "/oauth2/**",              // OAuth2 인가요청, 콜백 모두 포함
-                        "/login/oauth2/**",
-                        "/ws/**",
-                        "/topic/**",
-                        "/app/**"
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfig()))
-                .authorizeHttpRequests(auth -> auth
-                        // 퍼블릭으로 열어둘 URL들
-                        .requestMatchers(
-                                "/api/**",
-                                "/login/**",
-                                "/oauth2/authorization/google",        // 구글 인가 요청
-                                "/login/oauth2/code/google",           // 구글 콜백
-                                "/favicon.ico"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                // 기존 로그인 필터
-                .addFilterAt(new LoginFilter(authenticationManager(), jwtUtil),
-                        UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    // 2) 그 외 모든 요청: JWTFilter 적용 + 인증 필요
-    @Bean
-    @Order(2)
-    public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception {
-        http
-                // /api/** 를 제외한 나머지 요청에만 매칭
-                .securityMatcher("/auth/**")
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
-                )
-                .cors(cors -> cors.configurationSource(corsConfig()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // JWT 검증 필터를 UsernamePasswordAuthenticationFilter 앞에 등록
-                .addFilterBefore(new JWTFilter(jwtUtil),
-                        UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-    @Bean
-    @Order(3)
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/**") // 모든 요청을 포함
-                .authorizeHttpRequests(auth -> auth.anyRequest().denyAll());
-        return http.build();
-    }
-
     // CORS 공통 설정 메서드
     private CorsConfigurationSource corsConfig() {
         return request -> {
@@ -120,4 +55,34 @@ public class SecurityConfig {
             return config;
         };
     }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfig()))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers(
+                                "/api/**",
+                                "/login/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/favicon.ico"
+                        ).permitAll()
+                        .requestMatchers("/auth/**").authenticated()
+                        .anyRequest().denyAll()
+                )
+                .addFilterAt(
+                        new LoginFilter(authenticationManager(), jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                        new JWTFilter(jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class
+                );
+        return http.build();
+    }
+
 }

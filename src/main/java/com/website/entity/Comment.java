@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -20,10 +19,8 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_code")
     private Long commentCode;
-
     @Column(nullable = false)
     private String content;
-
     @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
     @Column(name = "is_delete", nullable = false)
