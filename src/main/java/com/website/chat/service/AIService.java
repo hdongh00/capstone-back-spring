@@ -1,10 +1,12 @@
 package com.website.chat.service;
 
 import com.website.entity.ChatMessage;
+import com.website.entity.Message;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,14 +25,14 @@ public class AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String getAIResponse(List<ChatMessage> history, String newMessage){
+    public String getAIResponse(List<Message> history, String newMessage){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         List<Map<String, Object>> contents = new ArrayList<>();
-        for (ChatMessage msg : history) {
-            String role = msg.getSenderName().equals("챗봇") ? "model" : "user";
-            contents.add(Map.of("role", role, "parts", List.of(Map.of("text", msg.getMessage()))));
+        for (Message msg : history) {
+            String role = msg.getRole().equals("user") ? "user" : "model";
+            contents.add(Map.of("role", role, "parts", List.of(Map.of("text", msg.getContent()))));
         }
         // 마지막 사용자 메시지 추가
         contents.add(Map.of("role", "user", "parts", List.of(Map.of("text", newMessage))));

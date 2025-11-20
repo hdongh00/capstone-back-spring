@@ -25,6 +25,12 @@ public class User { //User 테이블
     @Column(name = "chat_bot")
     private String chatBot;
     @Column
+    private String bio;
+    @Column
+    private String city;
+    @Column
+    private String region;
+    @Column
     private boolean enable;
     @Column
     private String role;

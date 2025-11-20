@@ -1,14 +1,12 @@
 package com.website.chat.service;
 
 import com.website.chat.dto.AI;
+import com.website.chat.dto.ChatMessage;
 import com.website.chat.dto.ConversationDto;
-import com.website.chat.repository.ChatMessageRepository;
 import com.website.common.exception.InvalidEnumValueException;
 import com.website.common.exception.NotAllowException;
-import com.website.entity.ChatMessage;
 import com.website.entity.Conversation;
 import com.website.entity.Message;
-import com.website.entity.User;
 import com.website.repository.ConversationRepository;
 import com.website.repository.MessageRepository;
 import org.bson.types.ObjectId;
@@ -16,29 +14,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ChatService {
-    private final ChatMessageRepository chatMessageRepository;
     private final AIService aiService;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
 
-    public ChatService(ChatMessageRepository chatMessageRepository, AIService aiService, SimpMessagingTemplate messagingTemplate, ConversationRepository conversationRepository, MessageRepository messageRepository) {
-        this.chatMessageRepository = chatMessageRepository;
+    public ChatService(AIService aiService, ConversationRepository conversationRepository, MessageRepository messageRepository) {
         this.aiService = aiService;
-        this.messagingTemplate = messagingTemplate;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
     }
@@ -102,39 +92,25 @@ public class ChatService {
         Pageable pageable = PageRequest.of(page, 50, Sort.by("createdAt").ascending());
         return messageRepository.findByConvIdAndUserCode(new ObjectId(roomId), userCode, pageable);
     }
+    // 안녕?
+    // 답변
+    // 내가 방금 뭐라고 했게?
+    // 방금 안녕이라고 하셨습니다.
+    // 뭐해?
+    // 방금 안녕, 뭐해? 라고 하셨습니다.
 
-    @Async
-    public ChatMessage processAndGetAIResponse(ChatMessage userMessage) {
-        // 사용자 메시지를 MongoDB에 저장
-        userMessage.setTimestamp(LocalDateTime.now());
-        chatMessageRepository.save(userMessage);
-
-        //DB에서 채팅방의 최근 대화 기록 조회
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "timestamp"));
-        List<ChatMessage> recentMessages = chatMessageRepository.findByChatRoomIdOrderByTimestampDesc(userMessage.getChatRoomId(), pageable);
-        Collections.reverse(recentMessages);
-
+    public ChatMessage processAndGetAIResponse(ChatMessage msg, Long userCode) {
+        ObjectId convId = msg.getConvId();
+        String content = msg.getContent();
+        //DB 에서 채팅방의 최근 대화 기록 조회
+        List<Message> messageHistories = messageRepository.findTop10ByUserCodeAndConvIdOrderByCreatedAtDesc(userCode, convId);
+        // 유저 메세지 저장
+        messageRepository.save(new Message(convId, content,"user",userCode));
         // Gemini API를 호출해서 AI의 답변을 받아옴
-        String aiResponseText = aiService.getAIResponse(recentMessages, userMessage.getMessage());
-
+        String aiResponseText = aiService.getAIResponse(messageHistories, content);
         // AI의 답변으로 챗봇 메시지를 생성하여 MongoDB에 저장
-        ChatMessage botMessage = new ChatMessage();
-        botMessage.setChatRoomId(userMessage.getChatRoomId());
-        botMessage.setSenderName("챗봇");
-        botMessage.setMessage(aiResponseText);
-        botMessage.setTimestamp(LocalDateTime.now().plusNanos(1));
-        chatMessageRepository.save(botMessage);
-
-        return botMessage;
+        Message botMessage = new Message(convId, aiResponseText, "bot", userCode);
+        messageRepository.save(botMessage);
+        return new ChatMessage(convId, aiResponseText, "bot");
     }
-
-    public List<ChatMessage> getMessages(String chatRoomId){
-        return chatMessageRepository.findByChatRoomIdOrderByTimestampAsc(chatRoomId);
-    }
-
-    public void saveBotMessage(ChatMessage botMessage) {
-        chatMessageRepository.save(botMessage);
-    }
-
-
 }

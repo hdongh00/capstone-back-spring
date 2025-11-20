@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface MessageRepository extends MongoRepository<Message, ObjectId> {
-    List<Message> findTop50ByConvIdOrderByCreatedAtAsc(ObjectId convId);
+    List<Message> findTop10ByUserCodeAndConvIdOrderByCreatedAtDesc(Long userCode, ObjectId convId);
 
 
     Page<Message> findByConvIdAndUserCode(ObjectId id, Long userCode, Pageable pageable);

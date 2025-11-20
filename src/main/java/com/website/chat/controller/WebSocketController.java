@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
 
 @Controller
 public class WebSocketController {
@@ -51,7 +50,7 @@ public class WebSocketController {
         firstMessage.setTimestamp(LocalDateTime.now());
 
         // 첫 메시지를 DB에 저장
-        chatService.saveBotMessage(firstMessage);
+//        chatService.saveBotMessage(firstMessage);
         log.info(">>>> DB에 첫 메시지 저장 완료.");
 
         messagingTemplate.convertAndSend(
@@ -76,9 +75,9 @@ public class WebSocketController {
 
         messagingTemplate.convertAndSend("/topic/" + chatMessage.getChatRoomId(), chatMessage);
 
-        ChatMessage msg = chatService.processAndGetAIResponse(chatMessage);
+//        ChatMessage msg = chatService.processAndGetAIResponse(chatMessage, user.getUserCode());
 
-        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChatRoomId(), msg);
+//        messagingTemplate.convertAndSend("/topic/" + chatMessage.getChatRoomId(), msg);
 
     }
 

@@ -22,7 +22,7 @@ public class Kakao {
                 .header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
                 .bodyValue("grant_type=authorization_code"+
                         "&client_id=aa744aa96b95e26a882f6c6d522c3d97"+
-                        "&redirect_uri=http://localhost:5173/redirect"+
+                        "&redirect_uri=http://localhost:3000/redirect"+
                         "&code="+code)
                 .retrieve()
                 .bodyToMono(KakaoTokenResponse.class)

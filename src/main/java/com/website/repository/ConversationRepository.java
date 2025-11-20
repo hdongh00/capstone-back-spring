@@ -13,4 +13,8 @@ public interface ConversationRepository extends MongoRepository<Conversation, Ob
     List<Conversation> findAllByUserCodeAndDateBetween(Long userCode, LocalDateTime start, LocalDateTime end);
 
     List<Conversation> findAllByUserCodeAndStatusAndDateBetween(Long userCode, String  status, LocalDateTime start, LocalDateTime end);
+
+    Integer countByUserCode(Long userCode);
+
+    Integer countByUserCodeAndDateBetween(Long userCode, LocalDateTime start, LocalDateTime end);
 }

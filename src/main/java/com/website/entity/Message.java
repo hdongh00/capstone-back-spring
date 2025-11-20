@@ -20,9 +20,16 @@ public class Message {
     @Id
     private ObjectId id;
     private ObjectId convId;
-    private String userName;
     private String content;
     private LocalDateTime createdAt;
     private String role;
     private Long userCode;
+
+    public Message(ObjectId convId, String content, String role, Long userCode) {
+        this.convId = convId;
+        this.content = content;
+        this.createdAt = LocalDateTime.now();
+        this.role = role;
+        this.userCode = userCode;
+    }
 }
