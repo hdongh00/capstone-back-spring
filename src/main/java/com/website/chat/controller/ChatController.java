@@ -3,6 +3,7 @@ package com.website.chat.controller;
 import com.website.chat.dto.ChatMessage;
 import com.website.chat.dto.ConversationDto;
 import com.website.chat.service.ChatService;
+import com.website.entity.AnalysisResult;
 import com.website.entity.Message;
 import com.website.user.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -47,5 +48,14 @@ public class ChatController {
     public ResponseEntity<ChatMessage> sendChatMessage(@AuthenticationPrincipal CustomUserDetails user, @RequestBody ChatMessage msg){
         ChatMessage response = chatService.processAndGetAIResponse(msg, user.getUserCode());
         return ResponseEntity.ok().body(response);
+    }
+    @GetMapping("/calendar")
+    public ResponseEntity<List<AnalysisResult>> getCalendar(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam int year,
+            @RequestParam int month
+    ){
+        List<AnalysisResult> result = chatService.getMonthlyAnalysis(user.getUserCode(), year, month);
+        return ResponseEntity.ok().body(result);
     }
 }
