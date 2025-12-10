@@ -5,8 +5,10 @@ import com.website.chat.dto.ChatMessage;
 import com.website.chat.dto.ConversationDto;
 import com.website.common.exception.InvalidEnumValueException;
 import com.website.common.exception.NotAllowException;
+import com.website.entity.AnalysisResult;
 import com.website.entity.Conversation;
 import com.website.entity.Message;
+import com.website.repository.AnalysisResultRepository;
 import com.website.repository.ConversationRepository;
 import com.website.repository.MessageRepository;
 import org.bson.types.ObjectId;
@@ -26,13 +28,24 @@ public class ChatService {
     private final AIService aiService;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final AnalysisResultRepository analysisResultRepository;
 
-    public ChatService(AIService aiService, ConversationRepository conversationRepository, MessageRepository messageRepository) {
+    public ChatService(AIService aiService, ConversationRepository conversationRepository, MessageRepository messageRepository, AnalysisResultRepository analysisResultRepository) {
         this.aiService = aiService;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
+        this.analysisResultRepository = analysisResultRepository;
     }
 
+    public List<AnalysisResult> getMonthlyAnalysis(Long userCode, int year, int month){
+        //해당 월 시작일 계산
+        LocalDateTime start = LocalDateTime.of(year, month, 1, 0, 0);
+
+        //해당 월 마지막 계싼
+        LocalDateTime end = start.plusMonths(1);
+
+        return analysisResultRepository.findAllByUserCodeAndCreateAtBetween(userCode, start, end);
+    }
     /**
      * 대화 방 생성하는 메서드
      * @param userCode JWT 토큰 분해 유저 코드

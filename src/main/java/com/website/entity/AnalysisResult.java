@@ -26,4 +26,6 @@ public class AnalysisResult {
     private String summary;
     @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
+    @Column(name = "user_code", nullable = false)
+    private Long userCode;
 }
