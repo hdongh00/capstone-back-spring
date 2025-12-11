@@ -2,7 +2,10 @@ package com.website.chat.controller;
 
 import com.website.chat.dto.ChatMessage;
 import com.website.chat.dto.ConversationDto;
+import com.website.chat.dto.EmotionDto;
+import com.website.chat.dto.GrowthDto;
 import com.website.chat.service.ChatService;
+import com.website.entity.AnalysisResult;
 import com.website.entity.Message;
 import com.website.user.dto.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -25,8 +28,11 @@ public class ChatController {
 
     @PostMapping("/conversations")
     public ResponseEntity<String> createConversation(@AuthenticationPrincipal CustomUserDetails user, @RequestBody Map<String,String> body){
-        chatService.createConversation(user.getUserCode(), body.get("ai"));
-        return ResponseEntity.status(HttpStatus.CREATED).body("새로운 채팅방이 생성되었습니다!");
+        if(chatService.createConversation(user.getUserCode(), body.get("ai"))){
+            return ResponseEntity.status(HttpStatus.CREATED).body("새로운 채팅방이 생성되었습니다!");
+        } else {
+            return ResponseEntity.ok().build();
+        }
     }
     @GetMapping("/conversations")
     public ResponseEntity<List<ConversationDto>> getConversations(@AuthenticationPrincipal CustomUserDetails user){
@@ -42,5 +48,28 @@ public class ChatController {
     public ResponseEntity<Page<Message>> getMessage(@AuthenticationPrincipal CustomUserDetails user, @RequestParam String roomId, @RequestParam int page){
         Page<Message> messages = chatService.getMessages(user.getUserCode(), roomId, page);
         return ResponseEntity.ok().body(messages);
+    }
+    @GetMapping("/calendar")
+    public ResponseEntity<List<AnalysisResult>> getCalendar(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam int year,
+            @RequestParam int month
+    ){
+        List<AnalysisResult> result = chatService.getMonthlyAnalysis(user.getUserCode(), year, month);
+        return ResponseEntity.ok().body(result);
+    }
+    @GetMapping("/growth")
+    public ResponseEntity<GrowthDto> getGrowth(@AuthenticationPrincipal CustomUserDetails user){
+        GrowthDto dto = chatService.getGrowth(user.getUserCode());
+        return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/emotion")
+    public ResponseEntity<EmotionDto> getEmotion(
+            @AuthenticationPrincipal CustomUserDetails user,
+            @RequestParam int year,
+            @RequestParam int month){
+        EmotionDto dto = chatService.getEmotion(user.getUserCode(), year, month);
+        return ResponseEntity.ok().body(dto);
     }
 }

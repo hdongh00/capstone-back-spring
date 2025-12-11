@@ -1,7 +1,6 @@
 package com.website.repository;
 
 import com.website.entity.Conversation;
-import com.website.entity.Message;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -17,4 +16,6 @@ public interface ConversationRepository extends MongoRepository<Conversation, Ob
     Integer countByUserCode(Long userCode);
 
     Integer countByUserCodeAndDateBetween(Long userCode, LocalDateTime start, LocalDateTime end);
+
+    Boolean existsByUserCodeAndDateBetween(Long userCode, LocalDateTime start, LocalDateTime end);
 }
