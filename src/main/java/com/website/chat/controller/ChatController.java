@@ -43,9 +43,4 @@ public class ChatController {
         Page<Message> messages = chatService.getMessages(user.getUserCode(), roomId, page);
         return ResponseEntity.ok().body(messages);
     }
-    @PostMapping("/messages")
-    public ResponseEntity<ChatMessage> sendChatMessage(@AuthenticationPrincipal CustomUserDetails user, @RequestBody ChatMessage msg){
-        ChatMessage response = chatService.processAndGetAIResponse(msg, user.getUserCode());
-        return ResponseEntity.ok().body(response);
-    }
 }

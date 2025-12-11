@@ -23,12 +23,10 @@ import java.util.List;
 
 @Service
 public class ChatService {
-    private final AIService aiService;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
 
-    public ChatService(AIService aiService, ConversationRepository conversationRepository, MessageRepository messageRepository) {
-        this.aiService = aiService;
+    public ChatService(ConversationRepository conversationRepository, MessageRepository messageRepository) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
     }
@@ -89,28 +87,7 @@ public class ChatService {
      * @return Message 엔티티 페이지 객체로 그대로 반환
      */
     public Page<Message> getMessages(Long userCode, String roomId, int page) {
-        Pageable pageable = PageRequest.of(page, 50, Sort.by("createdAt").ascending());
+        Pageable pageable = PageRequest.of(page, 20, Sort.by("createdAt").ascending());
         return messageRepository.findByConvIdAndUserCode(new ObjectId(roomId), userCode, pageable);
-    }
-    // 안녕?
-    // 답변
-    // 내가 방금 뭐라고 했게?
-    // 방금 안녕이라고 하셨습니다.
-    // 뭐해?
-    // 방금 안녕, 뭐해? 라고 하셨습니다.
-
-    public ChatMessage processAndGetAIResponse(ChatMessage msg, Long userCode) {
-        ObjectId convId = msg.getConvId();
-        String content = msg.getContent();
-        //DB 에서 채팅방의 최근 대화 기록 조회
-        List<Message> messageHistories = messageRepository.findTop10ByUserCodeAndConvIdOrderByCreatedAtDesc(userCode, convId);
-        // 유저 메세지 저장
-        messageRepository.save(new Message(convId, content,"user",userCode));
-        // Gemini API를 호출해서 AI의 답변을 받아옴
-        String aiResponseText = aiService.getAIResponse(messageHistories, content);
-        // AI의 답변으로 챗봇 메시지를 생성하여 MongoDB에 저장
-        Message botMessage = new Message(convId, aiResponseText, "bot", userCode);
-        messageRepository.save(botMessage);
-        return new ChatMessage(convId, aiResponseText, "bot");
     }
 }
