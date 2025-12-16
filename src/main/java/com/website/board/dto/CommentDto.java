@@ -2,15 +2,12 @@ package com.website.board.dto;
 
 import com.website.board.domain.Comment;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 public class CommentDto {
 
     @Data
     public static class CreateRequest {
-        private Long forumId;
-        private Long userCode;
         private String content;
         private Long parentCommentId;
     }

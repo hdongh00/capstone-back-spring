@@ -21,9 +21,9 @@ public class BoardService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public Long createForumPost(ForumDto.CreateRequest request) {
+    public Long createForumPost(Long userCode, ForumDto.CreateRequest request) {
         Forum forum = Forum.builder()
-                .userCode(request.getUserCode())
+                .userCode(userCode)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .analysisCode(null)
@@ -90,16 +90,17 @@ public class BoardService {
     }
 
     @Transactional
-    public void addComment(CommentDto.CreateRequest request) {
-        Forum forum = forumRepository.findById(request.getForumId())
+    public void addComment(Long userCode, Long forumId, CommentDto.CreateRequest request) {
+        forumRepository.findById(forumId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
         Comment comment = Comment.builder()
-                .forumId(request.getForumId())
-                .userCode(request.getUserCode())
+                .forumId(forumId)
+                .userCode(userCode)
                 .content(request.getContent())
                 .build();
+
         commentRepository.save(comment);
-        forumRepository.save(forum);
     }
 
     @Transactional(readOnly = true)

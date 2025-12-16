@@ -1,14 +1,12 @@
 package com.website.board.dto;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 public class ForumDto {
 
     @Data
     public static class CreateRequest {
-        private Long userCode;
         private String title;
         private String content;
     }
@@ -42,17 +40,13 @@ public class ForumDto {
             response.setAnalysisSummary(null);
             response.setEmotionName(null);
             response.setCommentCount((int) commentCount);
-            if (forum.getLikedUserCodes() != null) {
-                response.setLikeCount(forum.getLikedUserCodes().size());
-            } else {
-                response.setLikeCount(0);
-            }
+            response.setLikeCount(
+                    forum.getLikedUserCodes() != null
+                            ? forum.getLikedUserCodes().size()
+                            : 0
+            );
             response.setCreatedAt(forum.getCreatedAt());
             return response;
-        }
-
-        public static Response from(com.website.board.domain.Forum forum) {
-            return from(forum, 0L);
         }
     }
 }
