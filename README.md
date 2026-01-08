@@ -19,9 +19,10 @@
 | **Framework** | Spring Boot 3.2.4 |
 | **Language** | Java 17 |
 | **Security** | Spring Security, JWT, OAuth2 (Kakao) |
-| **Database** | **MySQL** (User/Community), **MongoDB** (Chat Logs) |
+| **Database** | MariaDB (User/Community), MongoDB (Chat Logs) |
+| **AI Framework** | LangChain (Prompt & Context Management) |
+| **AI Model** | OpenAI GPT API |
 | **Communication** | WebSocket (STOMP), REST API |
-| **AI Integration** | LangChain (LLM Service) |
 
 ### Frontend
 | Category | Technology |
@@ -121,42 +122,36 @@ com.website
 
 ```mermaid
 graph TD
-    subgraph Client ["Client Side"]
+    subgraph Client
         FE[("🖥️ React Frontend")]
     end
 
-    subgraph Server ["Backend Server (AWS EC2)"]
-        direction TB
+    subgraph Server ["Backend Server"]
         SB[("🍃 Spring Boot Application")]
+        Logic["Core Logic<br/>(Auth, Chat, Board)"]
+        Lang[("🦜🔗 LangChain<br/>(LLM Orchestration)")]
         
-        subgraph Core_Logic ["Core Services"]
-            Auth[Security / JWT]
-            Chat[Chat Service & WebSocket]
-            Board[Board Service]
-            Analysis[Emotion Analysis Logic]
-        end
+        SB --> Logic
+        Logic --> Lang
     end
 
-    subgraph Data_Storage ["Hybrid Database"]
-        MySQL[("🐬 MySQL (RDBMS)<br/>- User Info<br/>- Board/Comment<br/>- Analysis Results")]
-        Mongo[("🍃 MongoDB (NoSQL)<br/>- Chat Logs<br/>- Conversation History")]
+    subgraph Database ["Hybrid Data Storage"]
+        Maria[("🐬 MariaDB (RDBMS)<br/>User / Board / Analysis")]
+        Mongo[("🍃 MongoDB (NoSQL)<br/>Chat Logs / History")]
     end
 
     subgraph External ["External Services"]
-        Kakao[("💬 Kakao OAuth")]
-        LLM[("🤖 LangChain / LLM")]
+        Kakao[("💬 Kakao Login")]
+        GPT[("🤖 OpenAI GPT API")]
     end
 
-    %% Flow Connections
-    FE -- "REST API (HTTP)" --> Auth
-    FE -- "WebSocket (STOMP)" --> Chat
+    FE -- "REST API / WebSocket" --> SB
     
-    SB --> Core_Logic
+    Logic -- "JPA" --> Maria
+    Logic -- "MongoRepository" --> Mongo
+    Logic -- "OAuth2" --> Kakao
     
-    Auth -- "Social Login" --> Kakao
-    Chat -- "Prompting" --> LLM
-    
-    Board -- "JPA" --> MySQL
-    Analysis -- "JPA" --> MySQL
-    Chat -- "MongoRepository" --> Mongo
+    Lang -- "API Request" --> GPT
+
+
 
