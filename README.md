@@ -22,19 +22,19 @@
 | **Database** | MariaDB (User/Community), MongoDB (Chat Logs) |
 | **AI Framework** | LangChain (Prompt & Context Management) |
 | **AI Model** | OpenAI GPT API |
-| **Communication** | WebSocket (STOMP), REST API |
+| **Communication** | REST API |
 
 ### Frontend
 | Category | Technology |
 | --- | --- |
 | **Framework** | React |
-| **Styling** | Styled-components (or CSS Framework) |
-| **Communication** | Axios, SockJS |
+| **Styling** | Tailwind CSS |
+| **Communication** | Axios |
 
 ### Infrastructure
 | Category | Technology |
 | --- | --- |
-| **Server** | AWS EC2 (Ubuntu) / Raspberry Pi |
+| **Server** | Raspberry Pi |
 | **Build Tool** | Gradle |
 
 ---
@@ -42,7 +42,7 @@
 ## ✨ 주요 기능 (Key Features)
 
 ### 1. 💬 AI 심리 상담 챗봇
-* **실시간 대화**: WebSocket(STOMP)을 이용한 지연 없는 실시간 채팅 환경 구현
+* **LLM 기반 대화**: LangChain과 GPT 모델을 활용하여 문맥을 이해하는 자연스러운 상담 제공
 * **대화 로그 저장**: MongoDB를 활용하여 방대한 양의 대화 내역을 유연하게 저장하고 관리
 
 ### 2. 📊 개인화된 성장 지표 (Growth Metrics)
@@ -126,7 +126,7 @@ graph TD
         FE[("🖥️ React Frontend")]
     end
 
-    subgraph Server ["Backend Server"]
+    subgraph Server ["Backend Server (Raspberry Pi)"]
         SB[("🍃 Spring Boot Application")]
         Logic["Core Logic<br/>(Auth, Chat, Board)"]
         Lang[("🦜🔗 LangChain<br/>(LLM Orchestration)")]
@@ -145,7 +145,7 @@ graph TD
         GPT[("🤖 OpenAI GPT API")]
     end
 
-    FE -- "REST API / WebSocket" --> SB
+    FE -- "REST API" --> SB
     
     Logic -- "JPA" --> Maria
     Logic -- "MongoRepository" --> Mongo
